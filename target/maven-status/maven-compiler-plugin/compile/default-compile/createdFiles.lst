@@ -1,0 +1,6 @@
+com/crypto/util/CalculationUtil.class
+com/crypto/domain/CalcResult.class
+com/crypto/config/BasicConfiguration.class
+com/crypto/config/App.class
+com/crypto/util/CryptoUtil.class
+com/crypto/rest/CryptoRest.class
