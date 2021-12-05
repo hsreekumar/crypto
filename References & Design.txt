@@ -1,0 +1,25 @@
+References and Design
+
+https://jonisalonen.com/2013/deriving-welfords-method-for-computing-variance/
+
+https://www.baeldung.com/java-aes-encryption-decryption
+
+https://github.com/dropwizard/dropwizard/tree/master/dropwizard-example
+
+Design
+-Uses AES symmetric key algorithm with CBC mode, which is a popular standard and better candidate than EBC, since initialization vector adds randomness.
+
+-Exposes api’s to create a secret using password and salt, and to generate an initialization vector which could be used one time
+
+-secret key and initialization vector are added to properties file, which is used for configuration, such that key remain same with reboot
+
+-uses Welford’s algorithm to calculate running mean and standard deviation, so that extra memory need not be allocated for storing historical data and calculation is fast. Values are reset to 0 on reboot.
+
+-junit tests are added which verifies the functionality based on the given input set as part of the assignment
+
+
+
+Scope for improvement
+
+Rather than adding the secret key to properties file, it could be encrypted using library functions like ‘jasypt’ and the secret key could be passed as a command line argument. 
+Even otherwise also, passing the secret itself as an system property when deployed in containerized environment would be safer than directly adding to properties
