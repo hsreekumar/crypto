@@ -1,8 +1,10 @@
 package com.crypto.util;
 
 import java.io.UnsupportedEncodingException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.Base64;
@@ -15,15 +17,17 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+import javax.xml.bind.DatatypeConverter;
 
 public class CryptoUtil {
 
-	private static final String AES_BLOCK_MODE = "AES/ECB/PKCS5Padding";
+	private static final String AES_BLOCK_MODE = "AES/CBC/PKCS5Padding";
 	private static final String AES = "AES";
 	private static String secret;
-	private static final String salt = "random12345";
+	private static String ivSpec;
 
 	public static SecretKey getKeyFromPassword(String password, String salt)
 			throws NoSuchAlgorithmException, InvalidKeySpecException {
@@ -33,14 +37,19 @@ public class CryptoUtil {
 		return secret;
 	}
 
+	public static IvParameterSpec generateIv() {
+		byte[] iv = new byte[16];
+		new SecureRandom().nextBytes(iv);
+		return new IvParameterSpec(iv);
+	}
+
 	public static String encrypt(String input)
 			throws BadPaddingException, IllegalBlockSizeException, NoSuchPaddingException, NoSuchAlgorithmException,
-			InvalidKeyException, InvalidKeySpecException, UnsupportedEncodingException {
+			InvalidKeyException, InvalidKeySpecException, UnsupportedEncodingException, InvalidAlgorithmParameterException {
 		byte[] crypted = null;
-
-		SecretKey key = getKeyFromPassword(secret, salt);
+		SecretKey key = new SecretKeySpec(DatatypeConverter.parseHexBinary(secret), "AES");
 		Cipher aesCipher = Cipher.getInstance(AES_BLOCK_MODE);
-		aesCipher.init(Cipher.ENCRYPT_MODE, key);
+		aesCipher.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(DatatypeConverter.parseHexBinary(getIvSpec())));
 		crypted = aesCipher.doFinal(input.getBytes());
 		Encoder encoder = Base64.getEncoder();
 		String encrypted = encoder.encodeToString(crypted);
@@ -49,12 +58,12 @@ public class CryptoUtil {
 
 	public static String decrypt(String input)
 			throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException,
-			IllegalBlockSizeException, InvalidKeySpecException, UnsupportedEncodingException {
+			IllegalBlockSizeException, InvalidKeySpecException, UnsupportedEncodingException, InvalidAlgorithmParameterException {
 		byte[] output = null;
 		Decoder decoder = Base64.getDecoder();
-		SecretKey key = getKeyFromPassword(secret, salt);
+		SecretKey key = new SecretKeySpec(DatatypeConverter.parseHexBinary(secret), "AES");
 		Cipher aesCipher = Cipher.getInstance(AES_BLOCK_MODE);
-		aesCipher.init(Cipher.DECRYPT_MODE, key);
+		aesCipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(DatatypeConverter.parseHexBinary(getIvSpec())));
 		output = aesCipher.doFinal(decoder.decode(input));
 
 		return new String(output);
@@ -66,6 +75,14 @@ public class CryptoUtil {
 
 	public static void setSecret(String secret) {
 		CryptoUtil.secret = secret;
+	}
+
+	public static String getIvSpec() {
+		return ivSpec;
+	}
+
+	public static void setIvSpec(String ivSpec) {
+		CryptoUtil.ivSpec = ivSpec;
 	}
 
 }

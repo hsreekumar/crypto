@@ -9,7 +9,7 @@ public class CalculationUtil {
 	private double stdDev = 0.0;
 
 	/**
-	 * Incoming values used to calculate the running mean & standard deviation using WELFORD'S Algorithm
+	 * Calculates the running mean & standard deviation of incoming values using WELFORD'S Algorithm
 	 * 
 	 * @param value
 	 */

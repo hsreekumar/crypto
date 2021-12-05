@@ -7,22 +7,22 @@ import io.dropwizard.configuration.ResourceConfigurationSourceProvider;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 
-public class App extends Application<BasicConfiguration> {
+public class App extends Application<CryptoConfiguration> {
 
     public static void main(final String[] args) throws Exception {
         new App().run("server", "config.yml");
     }
 
     @Override
-    public void run(final BasicConfiguration basicConfiguration, final Environment environment) {
+    public void run(final CryptoConfiguration cryptoConfiguration, final Environment environment) {
         environment
           .jersey()
-          .register(new CryptoRest(basicConfiguration.getSecret()));
+          .register(new CryptoRest(cryptoConfiguration.getSecret(), cryptoConfiguration.getIv()));
 
     }
 
     @Override
-    public void initialize(final Bootstrap<BasicConfiguration> bootstrap) {
+    public void initialize(final Bootstrap<CryptoConfiguration> bootstrap) {
         bootstrap.setConfigurationSourceProvider(new ResourceConfigurationSourceProvider());
         super.initialize(bootstrap);
     }

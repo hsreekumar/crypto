@@ -12,19 +12,14 @@ import com.crypto.rest.CryptoRest;
 import com.crypto.util.CalculationUtil;
 import com.crypto.util.CryptoUtil;
 
-/**
- * Unit test for simple App.
- */
 public class AppTest {
-	/**
-	 * Rigorous Test :-)
-	 */
+	
+	private static final String secret = "CC4BF4BA49C0DCF6E0F67B8F3E54AC13655E6B91935614E933C232CC03CCC018";
+	private static final String iv = "8634738AC2AD9596869EAFBED2DE0248";
 
 	@Test
 	public void pushAndRecalculate() {
-		CryptoUtil util = new CryptoUtil();
-		CalculationUtil cal = new CalculationUtil();
-		CryptoRest rest = new CryptoRest("CC4BF4BA49C0DCF6E0F67B8F3E54AC13655E6B91935614E933C232CC03CCC018");
+		CryptoRest rest = new CryptoRest(secret, iv);
 		Object result = rest.pushAndRecalculate(4d).getEntity();
 		assertEquals(decimalFormatter(((CalcResult) result).getAverage()), "4");
 		assertEquals(decimalFormatter(((CalcResult) result).getStdDev()), "0");
@@ -44,14 +39,11 @@ public class AppTest {
 		result = rest.pushAndRecalculate(1d).getEntity();
 		assertEquals(decimalFormatter(((CalcResult) result).getAverage()), "5.4");
 		assertEquals(decimalFormatter(((CalcResult) result).getStdDev()), "2.728");
-//		JAKFoOJcuj/x/7LHWXTliXITRUJxw9JOvl15rZG4XM8=
 	}
 
 	@Test
 	public void pushRecalculateAndEncrypt() {
-		CryptoUtil util = new CryptoUtil();
-		CalculationUtil cal = new CalculationUtil();
-		CryptoRest rest = new CryptoRest("CC4BF4BA49C0DCF6E0F67B8F3E54AC13655E6B91935614E933C232CC03CCC018");
+		CryptoRest rest = new CryptoRest(secret, iv);
 		try {
 			Object result = rest.pushAndRecalculate(4d).getEntity();
 			assertEquals(decimalFormatter(((CalcResult) result).getAverage()), "4");
@@ -68,9 +60,9 @@ public class AppTest {
 			result = rest.pushRecalculateAndEncrypt(9d).getEntity();
 			System.out.println("Encrypt(6.5)  " + ((CalcResult) result).getEncryptedAverage());
 			System.out.println("Encrypt(1.803)  " + ((CalcResult) result).getEncryptedStdDev());
-			String average = util.decrypt(((CalcResult) result).getEncryptedAverage().toString());
+			String average = rest.decrypt(((CalcResult) result).getEncryptedAverage().toString()).getEntity().toString();
 			assertEquals(decimalFormatter(Double.parseDouble(average)), "6.5");
-			String stdDev = util.decrypt(((CalcResult) result).getEncryptedStdDev().toString());
+			String stdDev = rest.decrypt(((CalcResult) result).getEncryptedStdDev().toString()).getEntity().toString();
 			assertEquals(decimalFormatter(Double.parseDouble(stdDev)), "1.803");
 
 			result = rest.pushAndRecalculate(1d).getEntity();
